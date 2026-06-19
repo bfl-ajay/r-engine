@@ -1,0 +1,16 @@
+// Layout component - to be implemented in Phase 3
+import React from 'react';
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
+  return (
+    <div>
+      {/* Header will be implemented here */}
+      {children}
+      {/* Footer will be implemented here */}
+    </div>
+  );
+};

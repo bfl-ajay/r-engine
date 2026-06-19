@@ -1,0 +1,150 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: reporting-engine-postgres
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-reporting_engine}
+      POSTGRES_USER: ${DATABASE_USER:-reportuser}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-reportpass}
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DATABASE_USER:-reportuser}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - reporting-engine
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: reporting-engine-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - reporting-engine
+
+  # RabbitMQ Message Queue
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: reporting-engine-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "15672:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - reporting-engine
+
+  # Backend API Server
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend-runtime
+    container_name: reporting-engine-backend
+    environment:
+      DATABASE_URL: postgresql://${DATABASE_USER:-reportuser}:${DATABASE_PASSWORD:-reportpass}@postgres:5432/${DATABASE_NAME:-reporting_engine}
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672
+      NODE_ENV: ${NODE_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      BACKEND_PORT: ${BACKEND_PORT:-8080}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./apps/backend/src:/app/src
+      - /app/node_modules
+    networks:
+      - reporting-engine
+
+  # Frontend React App
+  frontend:
+    image: node:20-alpine
+    container_name: reporting-engine-frontend
+    working_dir: /app
+    environment:
+      VITE_API_URL: http://localhost:8080/api/v1
+      NODE_ENV: ${NODE_ENV:-development}
+    command: npm run dev --workspace=@reporting-engine/frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - /app/apps/frontend/node_modules
+    depends_on:
+      - backend
+    networks:
+      - reporting-engine
+
+  # Adminer (Database UI)
+  adminer:
+    image: adminer
+    container_name: reporting-engine-adminer
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+    networks:
+      - reporting-engine
+
+  # pgAdmin (PostgreSQL Management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: reporting-engine-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - reporting-engine
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  pgadmin_data:
+
+networks:
+  reporting-engine:
+    driver: bridge

@@ -1,0 +1,394 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Management
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String?
+  lastName  String?
+  status    UserStatus @default(ACTIVE)
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  roles      UserRole[]
+  reports    Report[]
+  reportVersions ReportVersion[]
+  dataSources DataSource[]
+  auditLogs  AuditLog[]
+  exportJobs ExportJob[]
+
+  @@index([email])
+  @@index([status])
+  @@map("users")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model Role {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  description String?
+  isSystemRole Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users      UserRole[]
+  permissions RolePermission[]
+
+  @@index([name])
+  @@map("roles")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  assignedAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model Permission {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  resource  String   // 'report', 'template', 'datasource', 'user'
+  action    String   // 'create', 'read', 'update', 'delete', 'execute'
+  description String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  roles     RolePermission[]
+
+  @@unique([resource, action])
+  @@index([resource])
+  @@index([action])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id        String   @id @default(cuid())
+  roleId    String
+  permissionId String
+  grantedAt DateTime @default(now())
+
+  // Relations
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+// Report Management
+model Report {
+  id        String   @id @default(cuid())
+  name      String
+  description String?
+  templateId String?
+  definition Json    // Complete report definition
+  status    ReportStatus @default(DRAFT)
+  version   String   @default("1.0.0")
+  createdBy String
+  modifiedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  createdByUser User        @relation(fields: [createdBy], references: [id])
+  template      ReportTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  versions      ReportVersion[]
+  instances     ReportInstance[]
+
+  @@index([name])
+  @@index([status])
+  @@index([createdBy])
+  @@index([templateId])
+  @@index([createdAt])
+  @@map("reports")
+}
+
+enum ReportStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model ReportVersion {
+  id        String   @id @default(cuid())
+  reportId  String
+  versionNumber String
+  definition Json
+  changeLog String?
+  createdBy String
+  createdAt DateTime @default(now())
+
+  // Relations
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [createdBy], references: [id])
+
+  @@unique([reportId, versionNumber])
+  @@index([reportId])
+  @@index([createdAt])
+  @@map("report_versions")
+}
+
+model ReportTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  description String?
+  baseTemplateId String?
+  definition Json    // Complete template structure
+  thumbnailPath String?
+  status    TemplateStatus @default(DRAFT)
+  version   String   @default("1.0.0")
+  createdBy String
+  modifiedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  baseTemplate ReportTemplate? @relation("TemplateInheritance", fields: [baseTemplateId], references: [id], onDelete: SetNull)
+  derivedTemplates ReportTemplate[] @relation("TemplateInheritance")
+  reports     Report[]
+  elements    TemplateElement[]
+
+  @@index([name])
+  @@index([status])
+  @@index([createdBy])
+  @@index([baseTemplateId])
+  @@map("report_templates")
+}
+
+enum TemplateStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model TemplateElement {
+  id        String   @id @default(cuid())
+  templateId String
+  elementType String  // 'band', 'object', 'style'
+  elementName String?
+  properties Json
+  displayOrder Int?
+  createdAt DateTime @default(now())
+
+  // Relations
+  template  ReportTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+  @@index([elementType])
+  @@map("template_elements")
+}
+
+// Data Sources
+model DataSource {
+  id        String   @id @default(cuid())
+  name      String
+  description String?
+  type      DataSourceType
+  connectionConfig Json  // Encrypted sensitive data
+  status    DataSourceStatus @default(ACTIVE)
+  lastStatusCheck DateTime?
+  lastError String?
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  createdByUser User @relation(fields: [createdBy], references: [id])
+  queries   DataSourceQuery[]
+
+  @@index([name])
+  @@index([type])
+  @@index([status])
+  @@index([createdBy])
+  @@map("data_sources")
+}
+
+enum DataSourceType {
+  SQL_SERVER
+  MYSQL
+  ORACLE
+  POSTGRESQL
+  MONGODB
+  CSV
+  XML
+  JSON
+  API
+}
+
+enum DataSourceStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+}
+
+model DataSourceQuery {
+  id        String   @id @default(cuid())
+  dataSourceId String
+  name      String
+  description String?
+  queryText String
+  queryType String   // 'sql', 'mql', 'rest'
+  parameters Json?   // Query parameters definition
+  resultCache Json?
+  cacheExpiresAt DateTime?
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  dataSource DataSource @relation(fields: [dataSourceId], references: [id], onDelete: Cascade)
+
+  @@index([dataSourceId])
+  @@index([name])
+  @@map("data_source_queries")
+}
+
+// Report Execution
+model ReportInstance {
+  id        String   @id @default(cuid())
+  reportId  String
+  executedBy String
+  status    ExecutionStatus @default(PENDING)
+  executionStart DateTime?
+  executionEnd DateTime?
+  totalPages Int?
+  totalRecords Int?
+  errorMessage String?
+  executionParameters Json?
+  executionContext Json?
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+
+  // Relations
+  report    Report   @relation(fields: [reportId], references: [id])
+  user      User     @relation(fields: [executedBy], references: [id])
+  pages     ReportPage[]
+  exportJobs ExportJob[]
+
+  @@index([reportId])
+  @@index([executedBy])
+  @@index([status])
+  @@index([createdAt])
+  @@map("report_instances")
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model ReportPage {
+  id        String   @id @default(cuid())
+  instanceId String
+  pageNumber Int
+  content   Bytes    // Compressed rendered content
+  contentType String @default("html")
+  createdAt DateTime @default(now())
+
+  // Relations
+  instance  ReportInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@unique([instanceId, pageNumber])
+  @@index([instanceId])
+  @@map("report_pages")
+}
+
+// Export Jobs
+model ExportJob {
+  id        String   @id @default(cuid())
+  instanceId String
+  format    ExportFormat
+  status    ExportStatus @default(PENDING)
+  filePath  String?
+  fileSize  BigInt?
+  requestedBy String
+  createdAt DateTime @default(now())
+  completedAt DateTime?
+  errorMessage String?
+
+  // Relations
+  instance  ReportInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [requestedBy], references: [id])
+
+  @@index([instanceId])
+  @@index([status])
+  @@index([requestedBy])
+  @@index([createdAt])
+  @@map("export_jobs")
+}
+
+enum ExportFormat {
+  PDF
+  EXCEL
+  WORD
+  HTML
+  CSV
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// Audit Logging
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String   // 'create', 'read', 'update', 'delete', 'execute'
+  resourceType String // 'report', 'template', 'datasource', 'user'
+  resourceId String?
+  resourceName String?
+  changeSummary Json?
+  ipAddress String?
+  userAgent String?
+  timestamp DateTime @default(now())
+
+  // Relations
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([resourceType])
+  @@index([timestamp])
+  @@index([action])
+  @@map("audit_logs")
+}

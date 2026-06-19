@@ -1,0 +1,43 @@
+.palette {
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.title {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.category {
+  margin-bottom: 8px !important;
+
+  &:before {
+    display: none;
+  }
+}
+
+.categoryDetails {
+  padding: 8px !important;
+}
+
+.objectList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.objectButton {
+  text-transform: none !important;
+  justify-content: flex-start !important;
+  font-size: 13px !important;
+  padding: 8px 12px !important;
+
+  &:hover {
+    background-color: rgba(33, 150, 243, 0.1) !important;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}

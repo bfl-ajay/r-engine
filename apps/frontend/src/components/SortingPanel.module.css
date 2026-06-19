@@ -1,0 +1,51 @@
+.sortingPanel {
+  width: 100%;
+}
+
+.sortingPanel :global(.MuiCard-root) {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sortingPanel :global(.MuiCardHeader-root) {
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 16px;
+}
+
+.sortingPanel :global(.MuiCardContent-root) {
+  padding: 24px;
+}
+
+.sortingPanel :global(.MuiList-root) {
+  width: 100%;
+  background-color: #fafafa;
+  border-radius: 4px;
+  margin-top: 12px;
+}
+
+.sortingPanel :global(.MuiListItem-root) {
+  border-bottom: 1px solid #e0e0e0;
+  padding-right: 100px;
+}
+
+.sortingPanel :global(.MuiListItem-root:last-child) {
+  border-bottom: none;
+}
+
+.sortingPanel :global(.MuiFormControlLabel-root) {
+  margin-bottom: 12px;
+  margin-left: 0;
+}
+
+.sortingPanel :global(.MuiCheckbox-root) {
+  margin-right: 8px;
+}
+
+.sortingPanel :global(.MuiDialog-root) {
+  z-index: 1300;
+}
+
+.sortingPanel :global(.MuiTextField-root) {
+  width: 100%;
+}
