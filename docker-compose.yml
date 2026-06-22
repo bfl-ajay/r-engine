@@ -66,12 +66,13 @@ services:
       dockerfile: Dockerfile
       target: backend-runtime
     container_name: reporting-engine-backend
+    restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${DATABASE_USER:-reportuser}:${DATABASE_PASSWORD:-reportpass}@postgres:5432/${DATABASE_NAME:-reporting_engine}
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672
-      NODE_ENV: ${NODE_ENV:-development}
-      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      NODE_ENV: ${NODE_ENV:-production}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
       BACKEND_PORT: ${BACKEND_PORT:-8080}
       JWT_SECRET: ${JWT_SECRET:-dev-secret-key}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
@@ -84,27 +85,22 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    volumes:
-      - ./apps/backend/src:/app/src
-      - /app/node_modules
     networks:
       - reporting-engine
 
   # Frontend React App
   frontend:
-    image: node:20-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend-runtime
     container_name: reporting-engine-frontend
-    working_dir: /app
+    restart: unless-stopped
     environment:
-      VITE_API_URL: http://localhost:8080/api/v1
-      NODE_ENV: ${NODE_ENV:-development}
-    command: npm run dev --workspace=@reporting-engine/frontend
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api/v1}
+      NODE_ENV: ${NODE_ENV:-production}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
-    volumes:
-      - ./:/app
-      - /app/node_modules
-      - /app/apps/frontend/node_modules
     depends_on:
       - backend
     networks:
