@@ -177,11 +177,11 @@ class PivotTableService {
 
     // Data rows
     pivot.rows.forEach((row, index) => {
-      const rowData = [row.label];
+      const rowData: (string | number)[] = [row.label];
       pivot.columns.forEach((col) => {
-        rowData.push(row.values.get(col) || 0);
+        rowData.push((row.values.get(col) ?? 0) as string | number);
       });
-      rowData.push(pivot.totals.rows[index]); // Row total
+      rowData.push((pivot.totals.rows[index] ?? 0) as string | number); // Row total
       result.push(rowData);
     });
 

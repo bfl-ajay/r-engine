@@ -3,7 +3,7 @@
  * Orchestrates report generation from definition and data
  */
 
-import type { ReportDefinition } from '../../../packages/shared/src/types';
+import type { ReportDefinition } from '@reporting-engine/shared';
 import htmlRenderer from './htmlRenderer';
 import dataBindingResolver from './dataBindingResolver';
 import expressionEngine from './expressionEngine';

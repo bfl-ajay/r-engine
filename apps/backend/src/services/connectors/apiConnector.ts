@@ -4,7 +4,7 @@
  */
 
 import * as axios from 'axios';
-import { DataSourceConnection } from '@report-engine/shared';
+import { DataSourceConnection } from '@reporting-engine/shared';
 import { ConnectorResult } from './postgresConnector';
 
 /**

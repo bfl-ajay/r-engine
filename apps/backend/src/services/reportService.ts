@@ -4,7 +4,7 @@
  */
 
 import prisma from '../database';
-import type { ReportDefinition, PaginationParams } from '../../../packages/shared/src/types';
+import type { ReportDefinition, PaginationParams } from '@reporting-engine/shared';
 
 interface CreateReportInput {
   name: string;

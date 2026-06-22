@@ -4,7 +4,7 @@
  */
 
 import { Router } from 'express';
-import { DataSourceConnection, QueryDefinition } from '@report-engine/shared';
+import { DataSourceConnection, QueryDefinition } from '@reporting-engine/shared';
 import { dataSourceService } from '../services/dataSourceService';
 import { asyncHandler } from '../middlewares/asyncHandler';
 import { validatePaginationParams } from '../middlewares/validation';

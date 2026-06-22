@@ -4,7 +4,7 @@
  */
 
 import * as mysql from 'mysql2/promise';
-import { DataSourceConnection } from '@report-engine/shared';
+import { DataSourceConnection } from '@reporting-engine/shared';
 import { ConnectorResult } from './postgresConnector';
 
 /**

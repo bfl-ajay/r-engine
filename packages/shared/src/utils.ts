@@ -389,12 +389,14 @@ export const calculateCanvasDimensions = (report: ReportDefinition) => {
 
   if (pageSetup.paperSize !== 'CUSTOM' && paperDimensions[pageSetup.paperSize]) {
     const dims = paperDimensions[pageSetup.paperSize];
-    if (pageSetup.orientation === 'LANDSCAPE') {
-      width = dims.height;
-      height = dims.width;
-    } else {
-      width = dims.width;
-      height = dims.height;
+    if (dims) {
+      if (pageSetup.orientation === 'LANDSCAPE') {
+        width = dims.height;
+        height = dims.width;
+      } else {
+        width = dims.width;
+        height = dims.height;
+      }
     }
   } else if (pageSetup.width && pageSetup.height) {
     width = pageSetup.width;

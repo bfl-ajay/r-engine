@@ -6,7 +6,7 @@
 import prisma from '../database';
 import reportService from './reportService';
 import renderingService from './renderingService';
-import type { ReportDefinition } from '../../../packages/shared/src/types';
+import type { ReportDefinition } from '@reporting-engine/shared';
 
 interface ExecutionParams {
   reportId: string;

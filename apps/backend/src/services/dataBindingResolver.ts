@@ -4,7 +4,7 @@
  */
 
 import expressionEngine from './expressionEngine';
-import type { ReportObject, ReportDefinition } from '../../../packages/shared/src/types';
+import type { ReportObject, ReportDefinition } from '@reporting-engine/shared';
 
 interface DataBindingContext {
   rowData: Record<string, any>;

@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "npm run build --workspace=@reporting-engine/shared && tsc",
     "start": "node dist/index.js",
     "start:prod": "NODE_ENV=production node dist/index.js",
     "type-check": "tsc --noEmit",
@@ -22,11 +22,12 @@
     "generate:types": "prisma generate"
   },
   "dependencies": {
+    "@reporting-engine/shared": "file:../../packages/shared",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
     "express": "^4.18.2",
     "fastify": "^4.23.0",
-    "cors": "^2.8.5",
     "helmet": "^7.0.0",
-    "compression": "^1.7.4",
     "morgan": "^1.10.0",
     "uuid": "^9.0.0",
     "@prisma/client": "^5.0.0",
@@ -35,14 +36,19 @@
     "dotenv": "^16.3.1",
     "winston": "^3.10.0",
     "pino": "^8.15.0",
-    "joi": "^17.10.0",
-    "zod": "^3.22.0",
     "amqplib": "^0.10.3",
+    "csv-parse": "^6.0.0",
+    "date-fns": "^2.30.0",
+    "mongodb": "^6.0.0",
+    "mssql": "^9.0.1",
+    "mysql2": "^3.5.0",
+    "pg": "^8.11.0",
+    "xlsx": "^0.18.5",
+    "zod": "^3.22.0",
     "redis": "^4.6.9",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
-    "axios": "^1.4.0",
-    "date-fns": "^2.30.0"
+    "axios": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.4.0",

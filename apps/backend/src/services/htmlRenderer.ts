@@ -3,8 +3,8 @@
  * Generates HTML output from report definition
  */
 
-import type { ReportDefinition, Band, ReportObject } from '../../../packages/shared/src/types';
-import { BAND_DISPLAY_NAMES } from '../../../packages/shared/src/utils';
+import type { ReportDefinition, Band, ReportObject } from '@reporting-engine/shared';
+import { BAND_DISPLAY_NAMES } from '@reporting-engine/shared';
 import dataBindingResolver from './dataBindingResolver';
 
 interface RenderOptions {
@@ -18,6 +18,7 @@ interface PageData {
   pageNumber: number;
   totalPages: number;
   parameters: Record<string, any>;
+  rowNumber?: number;
 }
 
 interface BandData {

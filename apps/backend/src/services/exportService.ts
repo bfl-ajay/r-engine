@@ -5,7 +5,7 @@
 
 import prisma from '../database';
 import renderingService from './renderingService';
-import type { ReportDefinition } from '../../../packages/shared/src/types';
+import type { ReportDefinition } from '@reporting-engine/shared';
 
 export type ExportFormat = 'PDF' | 'EXCEL' | 'CSV' | 'HTML' | 'WORD' | 'JSON' | 'XML';
 

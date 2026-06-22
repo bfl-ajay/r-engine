@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import * as csv from 'csv-parse/sync';
 import * as path from 'path';
-import { DataSourceConnection } from '@report-engine/shared';
+import { DataSourceConnection } from '@reporting-engine/shared';
 import { ConnectorResult } from './postgresConnector';
 
 /**

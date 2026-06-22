@@ -103,7 +103,12 @@ class AuthorizationService {
   /**
    * Create role
    */
-  createRole(name: string, description: string, permissions: string[]): Role {
+  createRole(
+    name: string,
+    displayName: string,
+    description: string,
+    permissions: string[]
+  ): Role {
     const id = `role_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const role: Role = {
@@ -310,6 +315,7 @@ class AuthorizationService {
     if (!sourceRole) return null;
 
     return this.createRole(
+      newRoleName,
       newRoleName,
       `Clone of ${sourceRole.name}`,
       [...sourceRole.permissions]

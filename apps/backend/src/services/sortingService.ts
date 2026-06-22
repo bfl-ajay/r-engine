@@ -219,6 +219,7 @@ class SortingService {
     });
 
     return this.sortData(data, sortDefs, {
+      fields: sortDefs,
       customComparators,
       caseInsensitive: true,
       nullsFirst: false,

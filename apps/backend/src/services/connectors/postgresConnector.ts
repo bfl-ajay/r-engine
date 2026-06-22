@@ -4,7 +4,7 @@
  */
 
 import { Pool, PoolClient } from 'pg';
-import { DataSourceConnection } from '@report-engine/shared';
+import { DataSourceConnection } from '@reporting-engine/shared';
 
 export interface ConnectorResult {
   success: boolean;

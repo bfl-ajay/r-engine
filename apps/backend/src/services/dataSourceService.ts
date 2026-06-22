@@ -3,20 +3,19 @@
  * Manages database connections, queries, and result caching
  */
 
-import { prisma } from '../db';
+import prisma from '../database';
 import {
   DataSourceConnection,
   QueryDefinition,
   QueryResult,
   DataSourceType,
   DataSourceTestResult,
-} from '@report-engine/shared';
+} from '@reporting-engine/shared';
 import { ApiError } from '../middlewares/errorHandler';
 import { PostgresConnector } from './connectors/postgresConnector';
 import { MySqlConnector } from './connectors/mysqlConnector';
 import { MongoConnector } from './connectors/mongoConnector';
-import { CsvConnector } from './connectors/csvConnector';
-import { JsonConnector } from './connectors/jsonConnector';
+import { CsvConnector, JsonConnector } from './connectors/csvConnector';
 import { ApiConnector } from './connectors/apiConnector';
 
 /**

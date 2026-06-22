@@ -9,7 +9,7 @@ import {
   JoinDefinition,
   AggregationDefinition,
   SortDefinitionEx,
-} from '@report-engine/shared';
+} from '@reporting-engine/shared';
 import { ApiError } from '../middlewares/errorHandler';
 
 /**

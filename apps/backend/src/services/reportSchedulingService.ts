@@ -35,7 +35,7 @@ export interface ScheduleExecution {
 class ReportSchedulingService {
   private schedules: Map<string, Schedule> = new Map();
   private executions: Map<string, ScheduleExecution> = new Map();
-  private timers: Map<string, NodeJS.Timer> = new Map();
+  private timers: Map<string, NodeJS.Timeout> = new Map();
 
   /**
    * Create schedule

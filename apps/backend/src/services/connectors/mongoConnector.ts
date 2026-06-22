@@ -4,7 +4,7 @@
  */
 
 import { MongoClient, Db } from 'mongodb';
-import { DataSourceConnection } from '@report-engine/shared';
+import { DataSourceConnection } from '@reporting-engine/shared';
 import { ConnectorResult } from './postgresConnector';
 
 /**
