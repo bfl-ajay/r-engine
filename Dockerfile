@@ -26,7 +26,6 @@ RUN npm run build --workspace=@reporting-engine/frontend
 FROM node:20-alpine AS backend-runtime
 WORKDIR /app
 ENV NODE_ENV=production
-RUN apk add --no-cache dumb-init
 # Copy pre-built node_modules and compiled output from builder
 COPY --from=backend-builder /build/node_modules ./node_modules
 COPY --from=backend-builder /build/apps/backend/dist ./dist
@@ -35,7 +34,6 @@ COPY --from=backend-builder /build/package.json ./package.json
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node -e "require('http').get('http://localhost:8080/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
-ENTRYPOINT ["/sbin/dumb-init", "--"]
 CMD ["node", "dist/index.js"]
 
 # Stage 4: Runtime - Frontend (nginx)
